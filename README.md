@@ -4,7 +4,9 @@ The app is an implementation of Ultimate Tic Tac Toe.
 ## Installation:
 
 1. Clone or download the repo into a folder of your choice.
-2. In the project directory, you can run in:
+2. Install dependencies
+### `npm start`<br />
+3. In the project directory, you can run in:
 
 #### Development Mode:
 

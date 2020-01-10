@@ -19,7 +19,7 @@ function Square(props) {
 
 class Board extends React.Component {
   renderSquare(i) {
-    return (
+    return (  
       <Square
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
@@ -29,7 +29,7 @@ class Board extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="board">
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -85,6 +85,28 @@ class Game extends React.Component {
     });
   }
 
+  renderUltimateBoard(current) {
+    let ultimateboard = [];
+  
+    for(let i = 0; i < 3; i++){
+      let boardrow = [];
+  
+      for(let j = 0; j < 3; j++){
+        boardrow.push(
+          <div className="box" key={3*i+j}>
+          <Board key={3*i+j}
+            squares={current.squares}
+            onClick={k => this.handleClick(k)}
+          />
+          </div>
+        )
+      }
+  
+      ultimateboard.push(<div className="game-boardrow" key={i}>{boardrow}</div>)
+    }
+    return ultimateboard;
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
@@ -107,19 +129,18 @@ class Game extends React.Component {
 
     return (
       <div className="game">
-        <div className="game-board">
-          <Board
-            squares={current.squares}
-            onClick={i => this.handleClick(i)}
-          />
-        </div>
+
+        {this.renderUltimateBoard(current)}
+
         <div className="game-info">
           <div>{status}</div>
         </div>
+
       </div>
     );
   }
 }
+
 
 // ========================================
 
@@ -157,7 +178,7 @@ function calculateWinner(squares) {
       numFull++;
     }
   }
-  
+
   if(numFull === squares.length){
     return({
       outcome: outcome.DRAW,

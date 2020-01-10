@@ -7,10 +7,9 @@ ol, ul {
   padding-left: 30px;
 }
 
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
+.board-row {
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .status {

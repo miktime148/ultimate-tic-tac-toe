@@ -94,10 +94,10 @@ class Game extends React.Component {
       for(let j = 0; j < 3; j++){
         boardrow.push(
           <div className="box" key={3*i+j}>
-          <Board key={3*i+j}
-            squares={current.squares}
-            onClick={k => this.handleClick(k)}
-          />
+            <Board key={3*i+j}
+              squares={current.squares}
+              onClick={k => this.handleClick(k)}
+            />
           </div>
         )
       }

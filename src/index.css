@@ -30,6 +30,10 @@ ol, ul {
   width: 34px;
 }
 
+.square-winner {
+  background: lightcoral;
+}
+
 .square:hover {
   border: 2px solid blue;
 }
@@ -51,7 +55,7 @@ margin: 10px;
 
 .game {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 
 .game-info {

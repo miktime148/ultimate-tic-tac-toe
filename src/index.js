@@ -11,7 +11,7 @@ const outcome = {
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button className={props.class || "square"} onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -19,15 +19,25 @@ function Square(props) {
 
 class Board extends React.Component {
   renderSquare(i) {
+    let className = null;
+
+    if(this.props.winningMove.outcome !== null){
+      if(this.props.winningMove.move.includes(i)){
+        className = "square square-winner";
+      }
+    }
+
     return (  
       <Square
+        class = {className}
         value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
+        onClick={() => this.props.onClick(i, this.props.id)}
       />
     );
   }
 
   render() {
+
     return (
       <div className="board">
         <div className="board-row">
@@ -54,42 +64,84 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      squares: Array(9).fill(null),
+      boards: this.initialBoards(),
+      currentBoard: 4,
       stepNumber: 0,
-      xIsMoving: true
+      xIsMoving: true,
+      largeboard: Array(9).fill({
+        outcome: null,
+        player: null,
+        move: null
+      })
     };
+
   }
 
-  handleClick(i) {
-    const squares = this.state.squares;
+  initialBoards(){
+    let boards = [];
 
-    let temp = calculateWinner(squares).outcome;
+    for(let i = 0; i < 9; i++){
+      boards.push(Array(9).fill(null));
+    }
 
-    if (temp === outcome.DRAW || temp === outcome.WINNER || squares[i]) {
+    return boards;
+  }
+
+  handleClick(squareNum, boardNum) {
+
+    if(boardNum !== this.state.currentBoard){
       return;
     }
 
-    squares[i] = this.state.xIsMoving ? "X" : "O";
+    const boards = this.state.boards;
+    const squares = boards[boardNum];
+
+    if (this.state.largeboard[boardNum].outcome === outcome.DRAW || squares[squareNum]) {
+      return;
+    }
+
+    squares[squareNum] = this.state.xIsMoving ? "X" : "O";
+    
+    let temp = calculateWinner(squares);
+
+    if(temp.outcome === outcome.WINNER){
+
+      const large = this.state.largeboard;
+
+      large[boardNum] = {
+        outcome: temp.outcome,
+        player: temp.player,
+        move: temp.move
+      };
+
+      this.setState({ largeboard: large })
+
+    }
 
     this.setState({
-      squares: squares,
+      boards:  boards,
+      currentBoard: squareNum,
       stepNumber: this.state.stepNumber + 1,
       xIsMoving: !this.state.xIsMoving
     });
   }
 
-  renderUltimateBoard(current) {
+  renderUltimateBoard() {
     let ultimateboard = [];
   
     for(let i = 0; i < 3; i++){
       let boardrow = [];
   
       for(let j = 0; j < 3; j++){
+        const boardID = 3*i+j;
         boardrow.push(
-          <div className="box" key={3*i+j}>
-            <Board key={3*i+j}
-              squares={this.state.squares}
-              onClick={k => this.handleClick(k)}
+          <div className="box" key={boardID}>
+            <Board 
+              key={boardID}
+              id={boardID}
+              squares={this.state.boards[boardID]}
+              winningMove={this.state.largeboard[boardID]} 
+              onClick={(squareNum, boardNum) => this.handleClick(squareNum, boardNum)}
             />
           </div>
         )
@@ -101,7 +153,7 @@ class Game extends React.Component {
   }
 
   render() {
-    const current = this.state.squares;
+    const current = this.state.boards[this.state.currentBoard];
     const winner = calculateWinner(current);
 
     let status;
@@ -119,14 +171,16 @@ class Game extends React.Component {
       default:
     }
 
+    status += "  Current board: " + this.state.currentBoard;
+
     return (
       <div className="game">
-
-        {this.renderUltimateBoard(current)}
 
         <div className="game-info">
           <div>{status}</div>
         </div>
+
+        {this.renderUltimateBoard()}
 
       </div>
     );

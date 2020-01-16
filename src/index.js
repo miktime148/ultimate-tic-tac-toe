@@ -23,7 +23,9 @@ class Board extends React.Component {
 
     if(this.props.winningMove.outcome !== null){
       if(this.props.winningMove.move.includes(i)){
-        className = "square square-winner";
+        this.props.winningMove.player === "X" ?
+          className = "square square-winner-X":
+          className = "square square-winner-O";
       }
     }
 
@@ -120,10 +122,24 @@ class Game extends React.Component {
 
     this.setState({
       boards:  boards,
-      currentBoard: squareNum,
+      currentBoard: this.boardFull(this.state.largeboard[squareNum]) ? squareNum : this.state.currentBoard,
       stepNumber: this.state.stepNumber + 1,
       xIsMoving: !this.state.xIsMoving
     });
+  }
+
+  boardFull(board){
+
+    for(let el in board){
+      if(el){
+        continue;
+      }
+      else{
+        return false;
+      }
+    }
+
+    return true;
   }
 
   renderUltimateBoard() {
@@ -135,7 +151,7 @@ class Game extends React.Component {
       for(let j = 0; j < 3; j++){
         const boardID = 3*i+j;
         boardrow.push(
-          <div className="box" key={boardID}>
+          <div className={this.state.currentBoard === boardID ? "box box-current" : "box"} key={boardID}>
             <Board 
               key={boardID}
               id={boardID}

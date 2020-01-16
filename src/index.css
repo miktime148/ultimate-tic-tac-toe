@@ -30,8 +30,12 @@ ol, ul {
   width: 34px;
 }
 
-.square-winner {
+.square-winner-X {
   background: lightcoral;
+}
+
+.square-winner-O {
+  background: lightblue;
 }
 
 .square:hover {
@@ -68,4 +72,8 @@ margin: 10px;
 
 .box{
     border: 2px solid black;
+}
+
+.box-current{
+  background: lightgreen;
 }

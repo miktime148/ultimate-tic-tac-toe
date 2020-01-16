@@ -21,11 +21,13 @@ class Board extends React.Component {
   renderSquare(i) {
     let className = null;
 
-    if(this.props.winningMove.outcome !== null){
-      if(this.props.winningMove.move.includes(i)){
-        this.props.winningMove.player === "X" ?
-          className = "square square-winner-X":
-          className = "square square-winner-O";
+    if(this.props.winningMove.outcome != null){
+      if(this.props.winningMove.move != null){
+        if(this.props.winningMove.move.includes(i)){
+          this.props.winningMove.player === "X" ?
+            className = "square square-winner-X":
+            className = "square square-winner-O";
+        }
       }
     }
 

@@ -67,7 +67,8 @@ class Game extends React.Component {
     super(props);
     this.state = {
       boards: this.initialBoards(),
-      currentBoard: 4,
+      currentBoard: [0,1,2,3,4,5,6,7,8],
+      availableBoards: [0,1,2,3,4,5,6,7,8],
       stepNumber: 0,
       xIsMoving: true,
       largeboard: Array(9).fill({
@@ -91,9 +92,11 @@ class Game extends React.Component {
 
   handleClick(squareNum, boardNum) {
 
-    if(boardNum !== this.state.currentBoard){
+    if(findIndexOfItem(this.state.currentBoard, boardNum) === -1 ){
       return;
     }
+
+    let newState = this.state;
 
     const boards = this.state.boards;
     const squares = boards[boardNum];
@@ -106,7 +109,7 @@ class Game extends React.Component {
     
     let temp = calculateWinner(squares);
 
-    if(temp.outcome === outcome.WINNER){
+    if(temp.outcome === outcome.WINNER || temp.outcome === outcome.DRAW){
 
       const large = this.state.largeboard;
 
@@ -116,16 +119,37 @@ class Game extends React.Component {
         move: temp.move
       };
 
-      this.setState({ largeboard: large })
-
+      newState = {
+        ...newState,
+        largeboard: large,
+        availableBoards: removeItemFromArray(this.state.availableBoards, boardNum)
+      }
     }
 
-    this.setState({
+    //determine next board to play on
+    let nextBoard = this.state.largeboard[squareNum];
+
+    if(nextBoard.outcome !== null){
+      newState = {
+        ...newState,
+        currentBoard: this.state.availableBoards
+      }
+    }
+    else{
+      newState = {
+        ...newState,
+        currentBoard: [squareNum]
+      }
+    }
+
+    newState = {
+      ...newState,
       boards:  boards,
-      currentBoard: this.boardFull(this.state.largeboard[squareNum]) ? squareNum : this.state.currentBoard,
       stepNumber: this.state.stepNumber + 1,
       xIsMoving: !this.state.xIsMoving
-    });
+    }
+
+    this.setState(newState);
   }
 
   boardFull(board){
@@ -150,8 +174,10 @@ class Game extends React.Component {
   
       for(let j = 0; j < 3; j++){
         const boardID = 3*i+j;
+        const current = this.state.currentBoard;
+
         boardrow.push(
-          <div className={this.state.currentBoard === boardID ? "box box-current" : "box"} key={boardID}>
+          <div className={ findIndexOfItem(current, boardID) !== -1 ? "box box-current" : "box"} key={boardID}>
             <Board 
               key={boardID}
               id={boardID}
@@ -169,25 +195,10 @@ class Game extends React.Component {
   }
 
   render() {
-    const current = this.state.boards[this.state.currentBoard];
-    const winner = calculateWinner(current);
 
-    let status;
+    let status = "";
 
-    switch(winner.outcome){
-      case outcome.WINNER:
-        status = "Winner: " + winner.player;
-        break;
-      case outcome.NOWINNER:
-        status = "Current player: " + (this.state.xIsMoving ? "X" : "O");
-        break;
-      case outcome.DRAW:
-        status = "Draw: No one wins :(";
-        break;
-      default:
-    }
-
-    status += "  Current board: " + this.state.currentBoard;
+    status += "  Current board: " + this.state.currentBoard + " Current Player: " + (this.state.xIsMoving ? "X" : "O");
 
     return (
       <div className="game">
@@ -203,11 +214,12 @@ class Game extends React.Component {
   }
 }
 
+ReactDOM.render(<Game />, document.getElementById("root"));
+
 
 // ========================================
 
-ReactDOM.render(<Game />, document.getElementById("root"));
-
+//Calculates the winner of a board
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -250,4 +262,28 @@ function calculateWinner(squares) {
   return({
     outcome: outcome.NOWINNER,
   });
+}
+
+//Removes all instances of an element from an array
+function removeItemFromArray(arr, item){
+  var index = arr.indexOf(item);
+
+  while(index !== -1){
+    if (index !== -1) arr.splice(index, 1);
+    index = arr.indexOf(item);
+  }
+
+  return arr;
+}
+
+//Finds first index of given item
+function findIndexOfItem(arr, item){
+
+  for(let i = 0; i < arr.length; i++){
+    if(arr[i] === item){
+      return i;
+    }
+  }
+
+  return -1;
 }

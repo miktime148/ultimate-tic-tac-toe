@@ -200,7 +200,28 @@ class Game extends React.Component {
 
     let status = "";
 
-    status += "  Current board: " + this.state.currentBoard + " Current Player: " + (this.state.xIsMoving ? "X" : "O");
+    //Check for grand winner
+    let bigBoard = [];
+
+    for(let i = 0; i < 9; i++){
+      bigBoard.push(this.state.largeboard[i].player);
+    }
+
+    const grandWinner = calculateWinner(bigBoard);
+
+    switch(grandWinner.outcome){
+      case outcome.WINNER:
+        status += "PLAYER " + grandWinner.player + " has won the game!!!";
+        break;
+      case outcome.NOWINNER:
+          status += "Current Player: " + (this.state.xIsMoving ? "X" : "O");
+          break;
+      case outcome.DRAW:
+            status += "DRAW!";
+            break;
+      default:
+        break;
+    }
 
     return (
       <div className="game">
@@ -237,7 +258,7 @@ function calculateWinner(squares) {
   //Check for winner
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+    if (squares[a] && squares[a] !== -1 && squares[a] === squares[b] && squares[a] === squares[c]) {
       return ({
         outcome: outcome.WINNER,
         player: squares[a],
@@ -247,17 +268,10 @@ function calculateWinner(squares) {
   }
 
   //Check for draw
-  let numFull = 0;
-
-  for (let i = 0; i < squares.length; i++) {
-    if(squares[i] != null){
-      numFull++;
-    }
-  }
-
-  if(numFull === squares.length){
+  if(findIndexOfItem(squares, null) === -1){
     return({
       outcome: outcome.DRAW,
+      player: -1
     });
   }
 

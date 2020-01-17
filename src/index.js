@@ -3,7 +3,19 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import * as Types from './types';
 
-
+//Initial game state
+function getInitialState() {
+  return({
+  info: "Current Player: X",
+  status: Types.status,
+  boards: initialBoards(),
+  currentBoard: [0,1,2,3,4,5,6,7,8],
+  availableBoards: [0,1,2,3,4,5,6,7,8],
+  stepNumber: 0,
+  xIsMoving: true,
+  largeboard: Array(9).fill(Types.status)
+  });
+}
 
 function Square(props) {
   return (
@@ -63,31 +75,7 @@ class Board extends React.Component {
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      info: "Current Player: X",
-      status: Types.status,
-      boards: this.initialBoards(),
-      currentBoard: [0,1,2,3,4,5,6,7,8],
-      availableBoards: [0,1,2,3,4,5,6,7,8],
-      stepNumber: 0,
-      xIsMoving: true,
-      largeboard: Array(9).fill({
-        outcome: null,
-        player: null,
-        move: null
-      })
-    };
-
-  }
-
-  initialBoards(){
-    let boards = [];
-
-    for(let i = 0; i < 9; i++){
-      boards.push(Array(9).fill(null));
-    }
-
-    return boards;
+    this.state = getInitialState();
   }
 
   handleClick(squareNum, boardNum) {
@@ -219,47 +207,51 @@ class Game extends React.Component {
     return ultimateboard;
   }
 
-updateGameStatus(newState){
-      //Check for grand winner
-      let status = "";
-      let bigBoard = [];
+  updateGameStatus(newState){
+    //Check for grand winner
+    let status = "";
+    let bigBoard = [];
 
-      for(let i = 0; i < 9; i++){
-        bigBoard.push(this.state.largeboard[i].player);
-      }
-  
-      const grandWinner = calculateWinner(bigBoard);
-  
-      switch(grandWinner.outcome){
-        case Types.outcome.WINNER:
-          status += "PLAYER " + grandWinner.player + " has won the game!!!";
-  
-          if(this.state.status === Types.status){
-            newState = {
-              ...newState,
-              status: {
-                outcome: grandWinner.outcome,
-                player: grandWinner.player,
-                move: grandWinner.move
-              }
+    for(let i = 0; i < 9; i++){
+      bigBoard.push(this.state.largeboard[i].player);
+    }
+
+    const grandWinner = calculateWinner(bigBoard);
+
+    switch(grandWinner.outcome){
+      case Types.outcome.WINNER:
+        status += "PLAYER " + grandWinner.player + " has won the game!!!";
+
+        if(this.state.status === Types.status){
+          newState = {
+            ...newState,
+            status: {
+              outcome: grandWinner.outcome,
+              player: grandWinner.player,
+              move: grandWinner.move
             }
           }
+        }
+        break;
+      case Types.outcome.NOWINNER:
+          status += "Current Player: " + (newState.xIsMoving ? "X" : "O");
           break;
-        case Types.outcome.NOWINNER:
-            status += "Current Player: " + (newState.xIsMoving ? "X" : "O");
-            break;
-        case Types.outcome.DRAW:
-            status += "DRAW!";
-            break;
-        default:
+      case Types.outcome.DRAW:
+          status += "DRAW!";
           break;
-      }
+      default:
+        break;
+    }
 
-      return {
-        ...newState,
-        info: status
-      };
-}
+    return {
+      ...newState,
+      info: status
+    };
+  }
+
+  resetGameState(){
+    this.setState(getInitialState());
+  }
 
   render() {
 
@@ -269,6 +261,12 @@ updateGameStatus(newState){
         <div className="game-info">
           <div>{this.state.info}</div>
         </div>
+
+        <button 
+          className="button"
+          onClick={() => {this.resetGameState()}}>
+          RESET GAME
+        </button>
 
         {this.renderUltimateBoard()}
 
@@ -342,4 +340,15 @@ function findIndexOfItem(arr, item){
   }
 
   return -1;
+}
+
+//Creates the initial boards for the game
+function initialBoards(){
+  let boards = [];
+
+  for(let i = 0; i < 9; i++){
+    boards.push(Array(9).fill(null));
+  }
+  console.log(boards);
+  return boards;
 }

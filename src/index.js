@@ -1,13 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import * as Types from './types';
 
-//Types
-const outcome = {
-  NOWINNER: 0,
-  WINNER: 1,
-  DRAW: 2,
-};
+
 
 function Square(props) {
   return (
@@ -68,6 +64,8 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      info: "Current Player: X",
+      status: Types.status,
       boards: this.initialBoards(),
       currentBoard: [0,1,2,3,4,5,6,7,8],
       availableBoards: [0,1,2,3,4,5,6,7,8],
@@ -103,7 +101,7 @@ class Game extends React.Component {
     const boards = this.state.boards;
     const squares = boards[boardNum];
 
-    if (this.state.largeboard[boardNum].outcome === outcome.DRAW || squares[squareNum]) {
+    if (this.state.largeboard[boardNum].outcome === Types.outcome.DRAW || squares[squareNum]) {
       return;
     }
 
@@ -111,7 +109,7 @@ class Game extends React.Component {
     
     let temp = calculateWinner(squares);
 
-    if(temp.outcome === outcome.WINNER || temp.outcome === outcome.DRAW){
+    if(temp.outcome === Types.outcome.WINNER || temp.outcome === Types.outcome.DRAW){
 
       const large = this.state.largeboard;
 
@@ -151,6 +149,14 @@ class Game extends React.Component {
       xIsMoving: !this.state.xIsMoving
     }
 
+    const newStatus = this.updateGameStatus(newState);
+
+    newState = {
+      ...newState,
+      info: newStatus.info,
+      status: newStatus.status
+    } 
+
     this.setState(newState);
   }
 
@@ -178,8 +184,25 @@ class Game extends React.Component {
         const boardID = 3*i+j;
         const current = this.state.currentBoard;
 
+        //determine class for box that encloses each board (depends on state of the enclosed board)
+        let className = null;
+
+        if(this.state.status.outcome != null){
+          if(this.state.status.move.includes(boardID)){
+            this.state.status.player === "X" ?
+              className = "box box-winner-X":
+              className = "box box-winner-O";
+          }
+          else{
+            className = "box";
+          }
+        }
+        else{
+          className = findIndexOfItem(current, boardID) !== -1 ? "box box-current" : "box";
+        }
+
         boardrow.push(
-          <div className={ findIndexOfItem(current, boardID) !== -1 ? "box box-current" : "box"} key={boardID}>
+          <div className={ className } key={boardID}>
             <Board 
               key={boardID}
               id={boardID}
@@ -196,38 +219,55 @@ class Game extends React.Component {
     return ultimateboard;
   }
 
-  render() {
+updateGameStatus(newState){
+      //Check for grand winner
+      let status = "";
+      let bigBoard = [];
 
-    let status = "";
-
-    //Check for grand winner
-    let bigBoard = [];
-
-    for(let i = 0; i < 9; i++){
-      bigBoard.push(this.state.largeboard[i].player);
-    }
-
-    const grandWinner = calculateWinner(bigBoard);
-
-    switch(grandWinner.outcome){
-      case outcome.WINNER:
-        status += "PLAYER " + grandWinner.player + " has won the game!!!";
-        break;
-      case outcome.NOWINNER:
-          status += "Current Player: " + (this.state.xIsMoving ? "X" : "O");
+      for(let i = 0; i < 9; i++){
+        bigBoard.push(this.state.largeboard[i].player);
+      }
+  
+      const grandWinner = calculateWinner(bigBoard);
+  
+      switch(grandWinner.outcome){
+        case Types.outcome.WINNER:
+          status += "PLAYER " + grandWinner.player + " has won the game!!!";
+  
+          if(this.state.status === Types.status){
+            newState = {
+              ...newState,
+              status: {
+                outcome: grandWinner.outcome,
+                player: grandWinner.player,
+                move: grandWinner.move
+              }
+            }
+          }
           break;
-      case outcome.DRAW:
+        case Types.outcome.NOWINNER:
+            status += "Current Player: " + (newState.xIsMoving ? "X" : "O");
+            break;
+        case Types.outcome.DRAW:
             status += "DRAW!";
             break;
-      default:
-        break;
-    }
+        default:
+          break;
+      }
+
+      return {
+        ...newState,
+        info: status
+      };
+}
+
+  render() {
 
     return (
       <div className="game">
 
         <div className="game-info">
-          <div>{status}</div>
+          <div>{this.state.info}</div>
         </div>
 
         {this.renderUltimateBoard()}
@@ -260,7 +300,7 @@ function calculateWinner(squares) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] !== -1 && squares[a] === squares[b] && squares[a] === squares[c]) {
       return ({
-        outcome: outcome.WINNER,
+        outcome: Types.outcome.WINNER,
         player: squares[a],
         move: lines[i],
       });
@@ -270,13 +310,13 @@ function calculateWinner(squares) {
   //Check for draw
   if(findIndexOfItem(squares, null) === -1){
     return({
-      outcome: outcome.DRAW,
+      outcome: Types.outcome.DRAW,
       player: -1
     });
   }
 
   return({
-    outcome: outcome.NOWINNER,
+    outcome: Types.outcome.NOWINNER,
   });
 }
 

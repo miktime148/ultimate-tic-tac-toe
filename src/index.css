@@ -77,3 +77,11 @@ margin: 10px;
 .box-current{
   background: lightgreen;
 }
+
+.box-winner-X{
+  background: lightcoral;
+}
+
+.box-winner-O{
+  background: lightblue;
+}

@@ -1,6 +1,8 @@
 This repo contains a React app that can be deployed over a local network.
 The app is an implementation of Ultimate Tic Tac Toe.
 
+![alt text](https://github.com/miktime148/ultimate-tic-tac-toe/blob/master/documentation/images/initialGameSetup.png)
+
 ## Tools for Installation:
  - node
 

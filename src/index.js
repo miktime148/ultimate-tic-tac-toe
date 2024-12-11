@@ -1,7 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import './index.css';
 import * as Types from './types';
+
+import {StrictMode} from 'react';
+import {createRoot} from 'react-dom/client';
+
 
 //Initial game state
 function getInitialState() {
@@ -275,7 +278,15 @@ class Game extends React.Component {
   }
 }
 
-ReactDOM.render(<Game />, document.getElementById("root"));
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement);
+root.render(
+  <StrictMode>
+    <Game />
+  </StrictMode>,
+);
+
+// ReactDOM.render(<Game />, document.getElementById("root"));
 
 
 // ========================================
